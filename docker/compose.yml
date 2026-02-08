@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "16379:6379"
+
+  mariadb:
+    image: mariadb:11
+    container_name: mariadb
+    ports:
+      - "33306:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: 1234
+      MARIADB_USER: app
+      MARIADB_PASSWORD: app123
+    volumes:
+      - ./mariadb/init:/docker-entrypoint-initdb.d
+
+  s3:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # Console
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    command: server /data --console-address ":9001"

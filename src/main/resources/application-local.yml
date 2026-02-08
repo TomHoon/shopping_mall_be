@@ -1,0 +1,90 @@
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+  application:
+    name: project
+  data:
+    redis:
+      host: localhost
+      port: 16379
+      timeout: 6000
+
+  springdoc:
+    swagger-ui:
+      path: /swagger-ui.html
+      enabled: true
+    api-docs:
+      path: /v3/api-docs
+      title: ShoppingMall API
+      description: ShoppingMall
+      version: 1.0.0
+
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://localhost:33306/shoppingmall
+    username: root
+    password: 1234
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+      #ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+
+  servlet:
+    multipart:
+      max-request-size: 50MB
+      max-file-size: 50MB
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+server:
+  shutdown: graceful
+  port: 33000
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+
+  # 개발 시 trace 보기
+  error:
+    include-stacktrace: never #에러 로그 always, never
+    include-message: always
+
+jwt:
+  secret: "jwtsecretkeyjwtsecretkeyjwtsecretkey12"
+
+mybatis:
+  mapper-locations: classpath:/mapper/**/*.xml
+  type-aliases-package: com.shopping.mall.**.dto
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    lazy-loading-enabled: true
+    aggressive-lazy-loading: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+logging:
+  level:
+    org.mybatis: DEBUG
+
+s3:
+  endpoint: http://localhost:9000
+  access-key: minio
+  secret-key: minio123
+  bucket: shoppingmall
+  region: us-east-1

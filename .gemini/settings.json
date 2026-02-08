@@ -1,0 +1,10 @@
+{
+  "project": "shoppingmall",
+  "language": "java",
+  "framework": "spring-boot",
+  "sourceRoot": "src/main/java",
+  "testRoot": "src/test/java",
+  "style": {
+    "java": "google-java-format"
+  }
+}
