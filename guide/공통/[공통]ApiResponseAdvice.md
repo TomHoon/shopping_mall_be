@@ -1,4 +1,4 @@
-# ApiResponseAdvice 공통 응답 가로채기 
+# ApiResponseAdvice 공통 응답 가로채기(이론설명)
 
 ---
 
