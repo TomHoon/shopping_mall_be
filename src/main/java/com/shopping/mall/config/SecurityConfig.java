@@ -22,9 +22,12 @@
  @EnableWebSecurity
  public class SecurityConfig {
 
-	 // TODO: 03/08 회원정책 정립되고 토큰 활성화 시킬 예정
-//	@Autowired
-//	private JwtAuthenticationFilter jwtAuthenticationFilter;
+	@Autowired
+	private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+	// TODO: 토큰 안정화 되고 추가
+//  @Autowired
+//	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -33,16 +36,23 @@
 		http
 				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 				.csrf(csrf -> csrf.disable())
+				.formLogin(login -> login.disable())
+				.httpBasic(basic -> basic.disable()) // JWT사용하기 때문에 Basic 암호화 비활성화.
+
+				// TODO: 토큰 안정화 되고 추가
+//				.exceptionHandling(exception ->
+//								exception.authenticationEntryPoint(jwtAuthenticationEntryPoint)
+//				)
+
 				.authorizeHttpRequests(auth ->
 						auth
 								.requestMatchers("/uploads/**").permitAll() // Allow access to images
 								.requestMatchers("/api/v1/*").permitAll()
 								/*.requestMatchers("/api/v1/admin/**").hasRole("ADMIN")*/
-								.anyRequest().permitAll()
+//								.anyRequest().authenticated()
+								.anyRequest().permitAll() // 테스트를 위해 허용 ALL
 				)
-				.formLogin(login -> login.disable())
-				.httpBasic(basic -> basic.disable()); // JWT사용하기 때문에 Basic 암호화 비활성화.
-//				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
 
