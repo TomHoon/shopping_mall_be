@@ -32,8 +32,8 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
 
     implementation("org.springframework.boot:spring-boot-starter-validation")
-    // 서비스 생성 전까지 주석
-// 	implementation("org.springframework.boot:spring-boot-starter-security")
+
+ 	  implementation("org.springframework.boot:spring-boot-starter-security")
 
     implementation("org.springframework.boot:spring-boot-starter-mail")
 
