@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.shopping.mall.product.mapper.ProductMapper">
+
+    <select id="findProduct"
+            parameterType="long"
+            resultType="ProductDetailResponse">
+
+        SELECT
+        id,
+        name,
+        description,
+        base_price AS basePrice
+        FROM product
+        WHERE id = #{productId}
+
+    </select>
+
+    <select id="findProductOptions"
+            parameterType="long"
+            resultType="OptionValueFlatDTO">
+
+        SELECT
+        og.id    AS optionGroupId,
+        og.name  AS optionGroupName,
+        ov.id    AS optionValueId,
+        ov.value AS optionValue
+        FROM option_group og
+        JOIN option_value ov
+        ON ov.option_group_id = og.id
+        WHERE og.product_id = #{productId}
+        ORDER BY og.sort_order
+
+    </select>
+
+    <select id="findProductSkus"
+            parameterType="long"
+            resultType="SkuFlatDTO">
+
+        SELECT
+        s.id        AS skuId,
+        s.sku_code  AS skuCode,
+        s.price     AS price,
+        s.stock     AS stock,
+
+        og.name     AS optionGroup,
+        ov.value    AS optionValue
+
+        FROM sku s
+        JOIN sku_option so
+        ON so.sku_id = s.id
+        JOIN option_value ov
+        ON ov.id = so.option_value_id
+        JOIN option_group og
+        ON og.id = ov.option_group_id
+
+        WHERE s.product_id = #{productId}
+
+    </select>
+
+</mapper>

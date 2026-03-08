@@ -1,0 +1,106 @@
+{
+  "data": {
+    "basePrice": 10000,
+    "description": "테스트용 스키니 바지",
+    "id": 1,
+    "name": "스키니 바지",
+    "optionGroups": [
+      {
+        "id": 1,
+        "name": "Color",
+        "values": [
+          {
+            "id": 1,
+            "value": "Black"
+          },
+          {
+            "id": 2,
+            "value": "Red"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "name": "Size",
+        "values": [
+          {
+            "id": 3,
+            "value": "M"
+          },
+          {
+            "id": 4,
+            "value": "L"
+          }
+        ]
+      }
+    ],
+    "skus": [
+      {
+        "options": [
+          {
+            "optionGroup": "Color",
+            "value": "Black"
+          },
+          {
+            "optionGroup": "Size",
+            "value": "M"
+          }
+        ],
+        "price": 10000,
+        "skuCode": "SKU-BLACK-M",
+        "skuId": 1,
+        "stock": 10
+      },
+      {
+        "options": [
+          {
+            "optionGroup": "Color",
+            "value": "Black"
+          },
+          {
+            "optionGroup": "Size",
+            "value": "L"
+          }
+        ],
+        "price": 10000,
+        "skuCode": "SKU-BLACK-L",
+        "skuId": 2,
+        "stock": 5
+      },
+      {
+        "options": [
+          {
+            "optionGroup": "Color",
+            "value": "Red"
+          },
+          {
+            "optionGroup": "Size",
+            "value": "M"
+          }
+        ],
+        "price": 10000,
+        "skuCode": "SKU-RED-M",
+        "skuId": 3,
+        "stock": 7
+      },
+      {
+        "options": [
+          {
+            "optionGroup": "Color",
+            "value": "Red"
+          },
+          {
+            "optionGroup": "Size",
+            "value": "L"
+          }
+        ],
+        "price": 10000,
+        "skuCode": "SKU-RED-L",
+        "skuId": 4,
+        "stock": 3
+      }
+    ]
+  },
+  "message": "success",
+  "statusCode": 200
+}

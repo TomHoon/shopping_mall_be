@@ -1,4 +1,9 @@
 spring:
+  sql:
+    init:
+      mode: always
+#       mode: never
+#       mode: embedded
   lifecycle:
     timeout-per-shutdown-phase: 20s
   application:
@@ -28,11 +33,12 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-      #ddl-auto: create-drop
+#      ddl-auto: create-drop
     properties:
       hibernate:
         format_sql: true
     show-sql: true
+    defer-datasource-initialization: true
 
   servlet:
     multipart:
