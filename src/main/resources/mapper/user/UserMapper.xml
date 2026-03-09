@@ -15,6 +15,18 @@
 
     </select>
 
+    <select id="findByUserEmail" parameterType="String" resultType="com.shopping.mall.user.dto.UserProfileResponseDto">
+
+        SELECT
+        id,
+        email,
+        status,
+        created_at
+        FROM user
+        WHERE email = #{email}
+
+    </select>
+
     <insert id="saveUser">
 
         INSERT INTO user
