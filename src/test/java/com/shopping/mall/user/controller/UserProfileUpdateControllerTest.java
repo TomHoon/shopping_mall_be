@@ -101,4 +101,27 @@ class UserProfileUpdateControllerTest {
                 .andExpect(jsonPath("$.message").value(ErrorCode.USER_NOT_FOUND.getMessage()))
                 .andExpect(jsonPath("$.statusCode").value(ErrorCode.USER_NOT_FOUND.getCode()));
     }
+
+    @Test
+    void updateUserProfile_validPasswordDto() throws Exception {
+
+        UserProfileUpdateRequestDto requestDto = new UserProfileUpdateRequestDto(null);
+        String body = objectMapper.writeValueAsString(requestDto);
+
+        mockMvc.perform(patch("/api/user/profile")
+                        .with(user(customUserDetails))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andDo(result -> {
+                    System.out.println("TEST 결과 : ");
+                    System.out.println(result.getResponse().getContentAsString());
+                })
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.statusCode").value(400))
+                .andExpect(jsonPath("$.message").exists());
+
+        verify(userService, never()).updateUserProfile(anyString(), any());
+
+    }
 }
