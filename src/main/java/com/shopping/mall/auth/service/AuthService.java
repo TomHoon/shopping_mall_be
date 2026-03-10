@@ -4,6 +4,8 @@ import com.shopping.mall.auth.dto.LoginRequestDTO;
 import com.shopping.mall.auth.dto.LoginResponseDTO;
 import com.shopping.mall.auth.dto.RegisterRequestDTO;
 import com.shopping.mall.common.JwtUtil;
+import com.shopping.mall.common.error.CustomGuideException;
+import com.shopping.mall.common.error.ErrorCode;
 import com.shopping.mall.user.entity.User;
 import com.shopping.mall.user.entity.UserStatus;
 import com.shopping.mall.user.mapper.UserMapper;
@@ -35,6 +37,8 @@ public class AuthService {
 			throw new RuntimeException("Password mismatch");
 		}
 
+        checkUserStatus(user.getStatus());
+
 		String role = userMapper.findUserRole(user.getId());
 
 		// 3. JWT 생성
@@ -55,4 +59,12 @@ public class AuthService {
 		userMapper.saveUser(user);
 
 	}
+
+    private void checkUserStatus(UserStatus status) {
+        if (status.equals(UserStatus.INACTIVE)) {
+            throw new CustomGuideException(ErrorCode.USER_INACTIVE);
+        } else if (status.equals(UserStatus.SUSPENDED)) {
+            throw new CustomGuideException(ErrorCode.USER_SUSPENDED);
+        }
+    }
 }

@@ -52,5 +52,9 @@ public class User {
     public void updateUser(UserProfileUpdateRequestDto requestDto) {
         if (requestDto.name() != null) this.name = requestDto.name();
     }
+
+    public void deleteUser() {
+        this.status = UserStatus.INACTIVE;
+    }
 }
 
