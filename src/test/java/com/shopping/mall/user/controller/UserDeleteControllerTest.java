@@ -1,6 +1,8 @@
 package com.shopping.mall.user.controller;
 
 import com.shopping.mall.auth.CustomUserDetails;
+import com.shopping.mall.common.error.CustomGuideException;
+import com.shopping.mall.common.error.ErrorCode;
 import com.shopping.mall.user.dto.UserDeleteRequestDto;
 import com.shopping.mall.user.entity.User;
 import com.shopping.mall.user.entity.UserStatus;
@@ -18,8 +20,10 @@ import tools.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -97,5 +101,27 @@ class UserDeleteControllerTest {
 
         verify(userService, never()).deleteUser(anyString(), any());
 
+    }
+
+    @Test
+    void deleteUser_notUser() throws Exception {
+
+        UserDeleteRequestDto requestDto = new UserDeleteRequestDto("test!@#");
+        String body = objectMapper.writeValueAsString(requestDto);
+
+        doThrow(new CustomGuideException(ErrorCode.USER_NOT_FOUND))
+                .when(userService).deleteUser(anyString(), eq(requestDto));
+
+        mockMvc.perform(patch("/api/user/delete")
+                        .with(user(customUserDetails))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andDo(result -> {
+                    System.out.println("TEST 결과 : ");
+                    System.out.println(result.getResponse().getContentAsString());
+                })
+                .andDo(print())
+                .andExpect(jsonPath("$.message").value(ErrorCode.USER_NOT_FOUND.getMessage()))
+                .andExpect(jsonPath("$.statusCode").value(ErrorCode.USER_NOT_FOUND.getCode()));
     }
 }
