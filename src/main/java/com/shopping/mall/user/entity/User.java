@@ -1,7 +1,11 @@
 package com.shopping.mall.user.entity;
 
+import com.shopping.mall.user.dto.UserProfileUpdateRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -10,6 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EntityListeners(AuditingEntityListener.class)
 @Entity
 @Table(
 	name = "user",
@@ -36,10 +41,16 @@ public class User {
 	@Column(nullable = false)
 	private UserStatus status;
 
+    @CreatedDate
 	@Column(nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 
+    @LastModifiedDate
 	@Column(nullable = false)
 	private LocalDateTime updatedAt;
 
+    public void updateUser(UserProfileUpdateRequestDto requestDto) {
+        if (requestDto.name() != null) this.name = requestDto.name();
+    }
 }
+
