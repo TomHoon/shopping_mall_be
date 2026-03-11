@@ -3,7 +3,6 @@ package com.shopping.mall.user.controller;
 import com.shopping.mall.auth.CustomUserDetails;
 import com.shopping.mall.common.error.CustomGuideException;
 import com.shopping.mall.common.error.ErrorCode;
-import com.shopping.mall.user.dto.UserProfileResponseDto;
 import com.shopping.mall.user.dto.UserProfileUpdateRequestDto;
 import com.shopping.mall.user.entity.User;
 import com.shopping.mall.user.entity.UserStatus;
@@ -21,10 +20,8 @@ import tools.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -77,7 +74,7 @@ class UserProfileUpdateControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk());
 
-        verify(userService, times(1)).updateUserProfile(eq(customUserDetails.getUser().getEmail()), any(UserProfileUpdateRequestDto.class));
+        then(userService).should(times(1)).updateUserProfile(eq(customUserDetails.getUser().getEmail()), any(UserProfileUpdateRequestDto.class));
     }
 
     @Test
@@ -86,8 +83,8 @@ class UserProfileUpdateControllerTest {
         UserProfileUpdateRequestDto requestDto = new UserProfileUpdateRequestDto("NEW:TEST");
         String body = objectMapper.writeValueAsString(requestDto);
 
-        doThrow(new CustomGuideException(ErrorCode.USER_NOT_FOUND))
-                .when(userService).updateUserProfile(anyString(), eq(requestDto));
+        willThrow(new CustomGuideException(ErrorCode.USER_NOT_FOUND))
+                .given(userService).updateUserProfile(anyString(), eq(requestDto));
 
         mockMvc.perform(patch("/api/user/profile")
                         .with(user(customUserDetails))
@@ -121,7 +118,7 @@ class UserProfileUpdateControllerTest {
                 .andExpect(jsonPath("$.statusCode").value(400))
                 .andExpect(jsonPath("$.message").exists());
 
-        verify(userService, never()).updateUserProfile(anyString(), any());
+        then(userService).should(never()).updateUserProfile(anyString(), any());
 
     }
 }

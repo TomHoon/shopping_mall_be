@@ -20,10 +20,8 @@ import tools.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -77,7 +75,7 @@ class UserDeleteControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk());
 
-        verify(userService, times(1)).deleteUser(eq(customUserDetails.getUser().getEmail()), any(UserDeleteRequestDto.class));
+        then(userService).should(times(1)).deleteUser(eq(customUserDetails.getUser().getEmail()), any(UserDeleteRequestDto.class));
     }
 
     @Test
@@ -99,7 +97,7 @@ class UserDeleteControllerTest {
                 .andExpect(jsonPath("$.statusCode").value(400))
                 .andExpect(jsonPath("$.message").exists());
 
-        verify(userService, never()).deleteUser(anyString(), any());
+        then(userService).should(never()).deleteUser(anyString(), any());
 
     }
 
@@ -109,8 +107,8 @@ class UserDeleteControllerTest {
         UserDeleteRequestDto requestDto = new UserDeleteRequestDto("test!@#");
         String body = objectMapper.writeValueAsString(requestDto);
 
-        doThrow(new CustomGuideException(ErrorCode.USER_NOT_FOUND))
-                .when(userService).deleteUser(anyString(), eq(requestDto));
+        willThrow(new CustomGuideException(ErrorCode.USER_NOT_FOUND))
+                .given(userService).deleteUser(anyString(), eq(requestDto));
 
         mockMvc.perform(patch("/api/user/delete")
                         .with(user(customUserDetails))
