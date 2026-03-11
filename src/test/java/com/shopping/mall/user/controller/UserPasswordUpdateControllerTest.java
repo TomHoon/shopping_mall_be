@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -81,7 +81,7 @@ class UserPasswordUpdateControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk());
 
-        verify(userService, times(1)).updatePassword(eq(customUserDetails.getUser().getEmail()), any(UserPasswordUpdateRequestDto.class));
+        then(userService).should(times(1)).updatePassword(eq(customUserDetails.getUser().getEmail()), any(UserPasswordUpdateRequestDto.class));
     }
 
     @ParameterizedTest
@@ -103,7 +103,7 @@ class UserPasswordUpdateControllerTest {
                 .andExpect(jsonPath("$.statusCode").value(400))
                 .andExpect(jsonPath("$.message").exists());
 
-        verify(userService, never()).updatePassword(anyString(), any());
+        then(userService).should(never()).updatePassword(anyString(), any());
 
     }
 
@@ -117,8 +117,8 @@ class UserPasswordUpdateControllerTest {
         );
         String body = objectMapper.writeValueAsString(requestDto);
 
-        doThrow(new CustomGuideException(ErrorCode.USER_NOT_FOUND))
-                .when(userService).updatePassword(anyString(), eq(requestDto));
+        willThrow(new CustomGuideException(ErrorCode.USER_NOT_FOUND))
+                .given(userService).updatePassword(anyString(), eq(requestDto));
 
         mockMvc.perform(patch("/api/user/new-password")
                         .with(user(customUserDetails))
@@ -143,8 +143,8 @@ class UserPasswordUpdateControllerTest {
         );
         String body = objectMapper.writeValueAsString(requestDto);
 
-        doThrow(new CustomGuideException(ErrorCode.INVALID_PASSWORD))
-                .when(userService).updatePassword(anyString(), eq(requestDto));
+        willThrow(new CustomGuideException(ErrorCode.INVALID_PASSWORD))
+                .given(userService).updatePassword(anyString(), eq(requestDto));
 
         mockMvc.perform(patch("/api/user/new-password")
                         .with(user(customUserDetails))
@@ -168,8 +168,8 @@ class UserPasswordUpdateControllerTest {
         );
         String body = objectMapper.writeValueAsString(requestDto);
 
-        doThrow(new CustomGuideException(ErrorCode.SAME_PASSWORD_NOT_ALLOWED))
-                .when(userService).updatePassword(anyString(), eq(requestDto));
+        willThrow(new CustomGuideException(ErrorCode.SAME_PASSWORD_NOT_ALLOWED))
+                .given(userService).updatePassword(anyString(), eq(requestDto));
 
         mockMvc.perform(patch("/api/user/new-password")
                         .with(user(customUserDetails))
