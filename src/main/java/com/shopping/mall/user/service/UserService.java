@@ -3,6 +3,7 @@ package com.shopping.mall.user.service;
 import com.shopping.mall.common.error.CustomGuideException;
 import com.shopping.mall.common.error.ErrorCode;
 import com.shopping.mall.user.dto.UserDeleteRequestDto;
+import com.shopping.mall.user.dto.UserPasswordUpdateRequestDto;
 import com.shopping.mall.user.dto.UserProfileResponseDto;
 import com.shopping.mall.user.dto.UserProfileUpdateRequestDto;
 import com.shopping.mall.user.entity.User;
@@ -59,4 +60,31 @@ public class UserService {
         user.deleteUser();
 
     }
+    /*
+        토큰에 들어있는 사용자의 이메일로 DB에서 사용자 조회 후 비밀번호 변경.(기존의 비밀번호와 새로운 비밀번호를 입력하여 변경)
+    */
+    @Transactional
+    public void updatePassword(String email, UserPasswordUpdateRequestDto requestDto) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomGuideException(ErrorCode.USER_NOT_FOUND));
+
+        if (!requestDto.newPassword().equals(requestDto.newPasswordConfirm())) {
+            throw new CustomGuideException(ErrorCode.INVALID_PASSWORD);
+        }
+
+        if (!passwordEncoder.matches(requestDto.currentPassword(), user.getPassword())) {
+            throw new CustomGuideException(ErrorCode.INVALID_PASSWORD);
+        }
+
+        if (passwordEncoder.matches(requestDto.newPassword(), user.getPassword())) {
+            throw new CustomGuideException(ErrorCode.SAME_PASSWORD_NOT_ALLOWED);
+        }
+
+        String newPassword = passwordEncoder.encode(requestDto.newPassword());
+
+        user.updatePassword(newPassword);
+
+    }
+
 }

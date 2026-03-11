@@ -1,5 +1,6 @@
 package com.shopping.mall.user.entity;
 
+import com.shopping.mall.user.dto.UserPasswordUpdateRequestDto;
 import com.shopping.mall.user.dto.UserProfileUpdateRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
@@ -55,6 +56,10 @@ public class User {
 
     public void deleteUser() {
         this.status = UserStatus.INACTIVE;
+    }
+
+    public void updatePassword(String newPassword) {
+        if (newPassword != null) this.password = newPassword;
     }
 }
 

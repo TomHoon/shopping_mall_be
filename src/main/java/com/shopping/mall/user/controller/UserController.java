@@ -2,6 +2,7 @@ package com.shopping.mall.user.controller;
 
 import com.shopping.mall.auth.CustomUserDetails;
 import com.shopping.mall.user.dto.UserDeleteRequestDto;
+import com.shopping.mall.user.dto.UserPasswordUpdateRequestDto;
 import com.shopping.mall.user.dto.UserProfileResponseDto;
 import com.shopping.mall.user.dto.UserProfileUpdateRequestDto;
 import com.shopping.mall.user.service.UserService;
@@ -40,6 +41,14 @@ public class UserController {
     public void deleteUser(@AuthenticationPrincipal CustomUserDetails details, @Valid @RequestBody UserDeleteRequestDto requestDto) {
 
         userService.deleteUser(details.getUser().getEmail(), requestDto);
+
+    }
+
+    @Operation(summary = "회원 비밀번호 수정", description = "사용자 Email, currentPassword로 회원 검증. newPassword와 newPasswordConfirm검증으로 비밀번호 변경")
+    @PatchMapping("/api/user/new-password")
+    public void updatePassword(@AuthenticationPrincipal CustomUserDetails details, @Valid @RequestBody UserPasswordUpdateRequestDto requestDto) {
+
+        userService.updatePassword(details.getUser().getEmail(), requestDto);
 
     }
 }
