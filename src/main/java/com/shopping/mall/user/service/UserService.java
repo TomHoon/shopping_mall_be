@@ -42,8 +42,7 @@ public class UserService {
         user.updateUser(requestDto);
 
     }
-
-
+  
     /*
         토큰에 들어있는 사용자의 이메일로 DB에서 사용자 조회 후 비밀번호 일치 시 회원 탈퇴.(Soft Delete)
      */
