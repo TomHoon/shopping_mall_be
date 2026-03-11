@@ -1,6 +1,5 @@
 package com.shopping.mall.user.service;
 
-import com.shopping.mall.auth.CustomUserDetails;
 import com.shopping.mall.common.error.CustomGuideException;
 import com.shopping.mall.common.error.ErrorCode;
 import com.shopping.mall.user.dto.UserProfileResponseDto;
@@ -20,18 +19,19 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceTest {
-    @Mock
-    UserMapper userMapper;
-
+public class UserProfileUpdateServiceTest {
     @Mock
     UserRepository userRepository;
+
+    @Mock
+    UserMapper userMapper;
 
     @InjectMocks
     UserService userService;
@@ -45,6 +45,7 @@ public class UserServiceTest {
         testUser = User.builder()
                 .id(1L)
                 .email("test@test.com")
+                .password("test!@#")
                 .name("test")
                 .createdAt(now)
                 .status(UserStatus.ACTIVE)
@@ -53,24 +54,10 @@ public class UserServiceTest {
     }
 
     @Test
-    void getUserProfile() {
-
-        UserProfileResponseDto dto = UserProfileResponseDto.from(testUser);
-
-        given(userMapper.findByUserEmail("test@test.com"))
-                .willReturn(Optional.of(dto));
-
-        UserProfileResponseDto response = userService.getUserProfile("test@test.com");
-
-        assertThat(response).isEqualTo(dto);
-
-        then(userMapper).should(times(1)).findByUserEmail("test@test.com");
-    }
-
-    @Test
     void updateUserProfile() {
 
-        given(userRepository.findByEmail("test@test.com")).willReturn(Optional.of(testUser));
+        given(userRepository.findByEmail("test@test.com"))
+                .willReturn(Optional.of(testUser));
 
         UserProfileUpdateRequestDto requestDto = UserProfileUpdateRequestDto.builder()
                 .name("NEW:TEST")
@@ -82,5 +69,22 @@ public class UserServiceTest {
 
         then(userRepository).should(times(1)).findByEmail("test@test.com");
 
+    }
+
+    @Test
+    void updateUserProfile_notUser() {
+
+        given(userRepository.findByEmail("test@test.com"))
+                .willReturn(Optional.empty());
+
+        UserProfileUpdateRequestDto requestDto = UserProfileUpdateRequestDto.builder()
+                .name("NEW:TEST")
+                .build();
+
+        CustomGuideException exception = assertThrows(CustomGuideException.class,
+                () -> userService.updateUserProfile("test@test.com", requestDto));
+
+        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND.getCode());
+        assertThat(exception.getMessage()).isEqualTo(ErrorCode.USER_NOT_FOUND.getMessage());
     }
 }

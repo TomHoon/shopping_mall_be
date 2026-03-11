@@ -1,6 +1,8 @@
 package com.shopping.mall.user.controller;
 
 import com.shopping.mall.auth.CustomUserDetails;
+import com.shopping.mall.common.error.CustomGuideException;
+import com.shopping.mall.common.error.ErrorCode;
 import com.shopping.mall.user.dto.UserProfileResponseDto;
 import com.shopping.mall.user.dto.UserProfileUpdateRequestDto;
 import com.shopping.mall.user.entity.User;
@@ -20,17 +22,17 @@ import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class UserControllerTest {
+class UserProfileUpdateControllerTest {
 
 	@Autowired
 	MockMvc mockMvc;
@@ -59,44 +61,15 @@ class UserControllerTest {
     }
 
     @Test
-    void getUserProfile() throws Exception {
-        LocalDateTime now = LocalDateTime.now();
-
-        UserProfileResponseDto responseDto = UserProfileResponseDto.builder()
-                .id(1L)
-                .email("test@test.com")
-                .name("test")
-                .createdAt(now)
-                .status(UserStatus.ACTIVE)
-                .build();
-
-        given(userService.getUserProfile(anyString())).willReturn(responseDto);
-
-        mockMvc.perform(get("/api/user/profile")
-                        .with(user(customUserDetails)))
-                .andDo(result -> {
-                    System.out.println("TEST 결과 : ");
-                    System.out.println(result.getResponse().getContentAsString());
-                })
-                .andDo(print())
-                .andExpect(status().isOk());
-
-        verify(userService, times(1)).getUserProfile(eq(customUserDetails.getUser().getEmail()));
-    }
-
-    @Test
     void updateUserProfile() throws Exception {
-        UserProfileUpdateRequestDto requestDto = UserProfileUpdateRequestDto.builder()
-                .name("NEW:TEST")
-                .build();
 
-        // 2. 이 객체를 JSON 문자열(String)로 변환합니다.
+        UserProfileUpdateRequestDto requestDto = new UserProfileUpdateRequestDto("NEW:TEST");
         String body = objectMapper.writeValueAsString(requestDto);
 
         mockMvc.perform(patch("/api/user/profile")
-                .with(user(customUserDetails))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body))
+                        .with(user(customUserDetails))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
                 .andDo(result -> {
                     System.out.println("TEST 결과 : ");
                     System.out.println(result.getResponse().getContentAsString());
@@ -105,5 +78,50 @@ class UserControllerTest {
                 .andExpect(status().isOk());
 
         verify(userService, times(1)).updateUserProfile(eq(customUserDetails.getUser().getEmail()), any(UserProfileUpdateRequestDto.class));
+    }
+
+    @Test
+    void updateUserProfile_notUser() throws Exception {
+
+        UserProfileUpdateRequestDto requestDto = new UserProfileUpdateRequestDto("NEW:TEST");
+        String body = objectMapper.writeValueAsString(requestDto);
+
+        doThrow(new CustomGuideException(ErrorCode.USER_NOT_FOUND))
+                .when(userService).updateUserProfile(anyString(), eq(requestDto));
+
+        mockMvc.perform(patch("/api/user/profile")
+                        .with(user(customUserDetails))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andDo(result -> {
+                    System.out.println("TEST 결과 : ");
+                    System.out.println(result.getResponse().getContentAsString());
+                })
+                .andDo(print())
+                .andExpect(jsonPath("$.message").value(ErrorCode.USER_NOT_FOUND.getMessage()))
+                .andExpect(jsonPath("$.statusCode").value(ErrorCode.USER_NOT_FOUND.getCode()));
+    }
+
+    @Test
+    void updateUserProfile_validPasswordDto() throws Exception {
+
+        UserProfileUpdateRequestDto requestDto = new UserProfileUpdateRequestDto(null);
+        String body = objectMapper.writeValueAsString(requestDto);
+
+        mockMvc.perform(patch("/api/user/profile")
+                        .with(user(customUserDetails))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andDo(result -> {
+                    System.out.println("TEST 결과 : ");
+                    System.out.println(result.getResponse().getContentAsString());
+                })
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.statusCode").value(400))
+                .andExpect(jsonPath("$.message").exists());
+
+        verify(userService, never()).updateUserProfile(anyString(), any());
+
     }
 }
