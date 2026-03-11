@@ -3,6 +3,7 @@ package com.shopping.mall.user.service;
 import com.shopping.mall.auth.CustomUserDetails;
 import com.shopping.mall.common.error.CustomGuideException;
 import com.shopping.mall.common.error.ErrorCode;
+import com.shopping.mall.user.dto.UserDeleteRequestDto;
 import com.shopping.mall.user.dto.UserProfileResponseDto;
 import com.shopping.mall.user.dto.UserProfileUpdateRequestDto;
 import com.shopping.mall.user.entity.User;
@@ -15,15 +16,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
-
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -36,6 +39,9 @@ public class UserServiceTest {
     @InjectMocks
     UserService userService;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     private User testUser;
 
     @BeforeEach
@@ -45,6 +51,7 @@ public class UserServiceTest {
         testUser = User.builder()
                 .id(1L)
                 .email("test@test.com")
+                .password("test!@#")
                 .name("test")
                 .createdAt(now)
                 .status(UserStatus.ACTIVE)

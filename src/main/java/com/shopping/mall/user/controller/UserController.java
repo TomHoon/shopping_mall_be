@@ -1,6 +1,7 @@
 package com.shopping.mall.user.controller;
 
 import com.shopping.mall.auth.CustomUserDetails;
+import com.shopping.mall.user.dto.UserDeleteRequestDto;
 import com.shopping.mall.user.dto.UserProfileResponseDto;
 import com.shopping.mall.user.dto.UserProfileUpdateRequestDto;
 import com.shopping.mall.user.service.UserService;
@@ -31,6 +32,14 @@ public class UserController {
     public void updateUserProfile(@AuthenticationPrincipal CustomUserDetails details, @Valid @RequestBody UserProfileUpdateRequestDto requestDto) {
 
         userService.updateUserProfile(details.getUser().getEmail(), requestDto);
+
+    }
+
+    @Operation(summary = "회원 정보 수정", description = "사용자 Email, Password로 회원을 탈퇴한다.(Soft Delete / Patch 요청)")
+    @PatchMapping("/api/user/delete")
+    public void deleteUser(@AuthenticationPrincipal CustomUserDetails details, @Valid @RequestBody UserDeleteRequestDto requestDto) {
+
+        userService.deleteUser(details.getUser().getEmail(), requestDto);
 
     }
 }

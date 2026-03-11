@@ -5,6 +5,9 @@ public enum ErrorCode {
 
     // user
     USER_NOT_FOUND(404, "존재하지 않는 사용자"),
+    INVALID_PASSWORD(400, "비밀번호가 일치하지 않음"),
+    USER_INACTIVE(400, "탈퇴하거나 비활성화된 회원"),
+    USER_SUSPENDED(400, "정지된 회원"),
 
 	BAD_REQUEST(400, "잘못된 요청"),
 	UNAUTHORIZED(401, "인증 필요"),
