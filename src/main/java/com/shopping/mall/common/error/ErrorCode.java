@@ -14,6 +14,7 @@ public enum ErrorCode {
     VERIFY_CODE_EXPIRED(404, "인증 코드 만료 또는 존재하지 않음"),
     VERIFY_CODE_MISMATCH(400, "인증 코드가 일치하지 않음"),
     UNAUTHORIZED_EMAIL(404, "이메일이 인증되지 않음"),
+    TOO_MANY_EMAIL_REQUEST(400, "이메일 요청 5분 후 재시도 바람"),
     MAIL_SEND_FAILED(500, "메일 전송 중 서버 오류"),
     VERIFY_CODE_FAILED(500, "인증 코드 처리 중 서버 오류"),
 

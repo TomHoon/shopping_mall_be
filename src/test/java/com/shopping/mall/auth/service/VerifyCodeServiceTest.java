@@ -13,6 +13,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
 
+import java.time.Duration;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
@@ -35,13 +37,18 @@ class VerifyCodeServiceTest {
         VerifyCodeRequestDTO requestDTO = new VerifyCodeRequestDTO("test@test.com", "123456");
         String prefix = "PREFIX:";
         String key = (prefix + requestDTO.email());
+        String countKey = "verify:count:" + requestDTO.email();
 
+        given(valueOperations.increment(countKey)).willReturn(1L);
         given(redisTemplate.opsForValue()).willReturn(valueOperations);
         given(valueOperations.get(key)).willReturn("123456");
 
         verificationService.verifyCode(requestDTO, prefix);
 
         then(valueOperations).should(times(1)).get(eq(key));
+        then(valueOperations).should(times(1)).increment(eq(countKey));
+        then(redisTemplate).should(times(1)).expire(eq(countKey), any(Duration.class));
+        then(redisTemplate).should(times(1)).delete(eq(countKey));
         then(redisTemplate).should(times(1)).delete(eq(key));
     }
 
@@ -94,6 +101,25 @@ class VerifyCodeServiceTest {
 
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.VERIFY_CODE_MISMATCH.getCode());
         assertThat(exception.getMessage()).isEqualTo(ErrorCode.VERIFY_CODE_MISMATCH.getMessage());
+
+    }
+
+    @Test
+    void verifyCode_toManyRequest() {
+        VerifyCodeRequestDTO requestDTO = new VerifyCodeRequestDTO("test@test.com", "123456");
+        String prefix = "PREFIX:";
+        String key = (prefix + requestDTO.email());
+        String countKey = "verify:count:" + requestDTO.email();
+
+        given(valueOperations.increment(countKey)).willReturn(6L);
+        given(redisTemplate.opsForValue()).willReturn(valueOperations);
+        given(valueOperations.get(key)).willReturn("000000");
+
+        CustomGuideException exception = assertThrows(CustomGuideException.class,
+                () -> verificationService.verifyCode(requestDTO, prefix));
+
+        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.TOO_MANY_EMAIL_REQUEST.getCode());
+        assertThat(exception.getMessage()).isEqualTo(ErrorCode.TOO_MANY_EMAIL_REQUEST.getMessage());
 
     }
 }

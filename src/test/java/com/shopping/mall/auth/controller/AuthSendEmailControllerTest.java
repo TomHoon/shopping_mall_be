@@ -107,4 +107,28 @@ class AuthSendEmailControllerTest {
 
         then(verificationService).should(times(1)).sendVerifyCode(any(CodeSendRequestDTO.class), anyString());
     }
+
+    @Test
+    void sendEmail_toManyRequest() throws Exception {
+        CodeSendRequestDTO requestDTO = new CodeSendRequestDTO("test@test.com");
+
+        String body = objectMapper.writeValueAsString(requestDTO);
+
+        willThrow(new CustomGuideException(ErrorCode.TOO_MANY_EMAIL_REQUEST))
+                .given(verificationService).sendVerifyCode(eq(requestDTO), anyString());
+
+        mockMvc.perform(post("/api/auth/send/email/reset/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andDo(result -> {
+                    System.out.println("TEST 결과 : ");
+                    System.out.println(result.getResponse().getContentAsString());
+                })
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.statusCode").value(ErrorCode.TOO_MANY_EMAIL_REQUEST.getCode()))
+                .andExpect(jsonPath("$.message").value(ErrorCode.TOO_MANY_EMAIL_REQUEST.getMessage()));
+
+        then(verificationService).should(times(1)).sendVerifyCode(any(CodeSendRequestDTO.class), anyString());
+    }
 }
