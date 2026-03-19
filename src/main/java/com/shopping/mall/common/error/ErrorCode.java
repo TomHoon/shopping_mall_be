@@ -11,8 +11,9 @@ public enum ErrorCode {
     USER_SUSPENDED(400, "정지된 회원"),
 
     // mail
-    VERIFY_CODE_EXPIRED(400, "인증 코드 만료 또는 존재하지 않음"),
+    VERIFY_CODE_EXPIRED(404, "인증 코드 만료 또는 존재하지 않음"),
     VERIFY_CODE_MISMATCH(400, "인증 코드가 일치하지 않음"),
+    UNAUTHORIZED_EMAIL(404, "이메일이 인증되지 않음"),
     MAIL_SEND_FAILED(500, "메일 전송 중 서버 오류"),
     VERIFY_CODE_FAILED(500, "인증 코드 처리 중 서버 오류"),
 
