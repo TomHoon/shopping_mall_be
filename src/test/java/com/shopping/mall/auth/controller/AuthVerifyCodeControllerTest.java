@@ -163,6 +163,30 @@ class AuthVerifyCodeControllerTest {
 
         then(verificationService).should(times(1)).verifyCode(any(VerifyCodeRequestDTO.class), anyString());
     }
+
+    @Test
+    void verifyCode_toManyRequest() throws Exception {
+        VerifyCodeRequestDTO requestDTO = new VerifyCodeRequestDTO("test@test.com", "123456");
+
+        String body = objectMapper.writeValueAsString(requestDTO);
+
+        willThrow(new CustomGuideException(ErrorCode.TOO_MANY_EMAIL_REQUEST))
+                .given(verificationService).verifyCode(eq(requestDTO), anyString());
+
+        mockMvc.perform(post("/api/auth/verify/code/reset/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andDo(result -> {
+                    System.out.println("TEST 결과 : ");
+                    System.out.println(result.getResponse().getContentAsString());
+                })
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.statusCode").value(ErrorCode.TOO_MANY_EMAIL_REQUEST.getCode()))
+                .andExpect(jsonPath("$.message").value(ErrorCode.TOO_MANY_EMAIL_REQUEST.getMessage()));
+
+        then(verificationService).should(times(1)).verifyCode(any(VerifyCodeRequestDTO.class), anyString());
+    }
 }
 
 

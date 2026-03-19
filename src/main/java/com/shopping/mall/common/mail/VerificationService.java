@@ -26,8 +26,19 @@ public class VerificationService {
     */
     public void sendVerifyCode(CodeSendRequestDTO requestDTO, String prefix) {
         String code = String.format("%06d", secureRandom.nextInt(1000000));
+        String countKey = "send:count:" + requestDTO.email();
 
         try {
+            Long count = redisTemplate.opsForValue().increment(countKey);
+
+            if (count != null && count == 1L) {
+                redisTemplate.expire(countKey, Duration.ofMinutes(5));
+            }
+
+            if (count != null && count > 5) {
+                throw new CustomGuideException(ErrorCode.TOO_MANY_EMAIL_REQUEST);
+            }
+
             redisTemplate.opsForValue().set(
                     prefix + requestDTO.email(),
                     code,
@@ -36,15 +47,18 @@ public class VerificationService {
 
             // 인증 코드 이메일 전송 비동기 실행
             CompletableFuture.runAsync(() -> {
-                emailUtil.sendEmail(requestDTO.email(), "[MUSINSA] 인증번호 안내", "인증번호는 [" + code + "] 입니다.");
+                emailUtil.sendEmail(requestDTO.email(), "[MUSINSA] 인증번호 안내 ", "인증번호는 [" + code + "] 입니다.");
             }).exceptionally(e -> {
                 log.error("이메일 전송 중 오류 Email: {}, Message: {}", requestDTO.email(), e.getMessage());
 
+                redisTemplate.delete(countKey);
                 redisTemplate.delete(prefix + requestDTO.email());
 
                 return null;
             });
 
+        } catch (CustomGuideException e) {
+            throw e;
         } catch (Exception e) {
             log.error("이메일 전송 중 오류 Email: {}, Message: {}", requestDTO.email(), e.getMessage());
             throw new CustomGuideException(ErrorCode.MAIL_SEND_FAILED);
@@ -59,10 +73,24 @@ public class VerificationService {
     */
     public void verifyCode(VerifyCodeRequestDTO requestDTO, String prefix) {
         String key = prefix + requestDTO.email();
+        String countKey = "verify:count:" + requestDTO.email();
         String savedCode;
 
         try {
             savedCode = redisTemplate.opsForValue().get(key);
+
+            Long count = redisTemplate.opsForValue().increment(countKey);
+
+            if (count != null && count == 1L) {
+                redisTemplate.expire(countKey, Duration.ofMinutes(5));
+            }
+
+            if (count != null && count > 5) {
+                throw new CustomGuideException(ErrorCode.TOO_MANY_EMAIL_REQUEST);
+            }
+
+        } catch (CustomGuideException e) {
+            throw e;
         } catch (Exception e) {
             throw new CustomGuideException(ErrorCode.VERIFY_CODE_FAILED);
         }
@@ -77,6 +105,7 @@ public class VerificationService {
 
         try {
             redisTemplate.delete(key);
+            redisTemplate.delete(countKey);
             redisTemplate.opsForValue().set("verify:"+requestDTO.email(), "true", Duration.ofMinutes(10));
         } catch (Exception e) {
             throw new CustomGuideException(ErrorCode.VERIFY_CODE_FAILED);
